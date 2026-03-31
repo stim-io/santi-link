@@ -4,17 +4,18 @@ use axum::{
     http::HeaderMap,
     response::{IntoResponse, Response},
 };
+use provider_openai_compatible::ResponsesApiBody;
 use serde_json::Value;
 use tracing::{error, info};
 
-use crate::{models::api_error::ApiErrorEnvelope, services::app_state::AppState};
+use crate::{models::api_error::ApiErrorEnvelope, state::AppState};
 
 #[utoipa::path(
     post,
     path = "/openai/v1/responses",
-    tag = "openai-codex-server",
+    tag = "providers",
     request_body(
-        content = crate::models::openai::ResponsesApiBody,
+        content = ResponsesApiBody,
         description = "OpenAI-compatible responses payload"
     ),
     responses(
@@ -38,25 +39,12 @@ pub async fn create_response_handler(
             .into_response();
     }
 
-    let auth = match state.auth.get_openai_auth().await {
-        Ok(auth) => auth,
-        Err(error) => {
-            error!(error = %error, "failed to load openai auth");
-            return (
-                axum::http::StatusCode::INTERNAL_SERVER_ERROR,
-                axum::Json(ApiErrorEnvelope::server_error(error.to_string())),
-            )
-                .into_response();
-        }
-    };
+    info!(
+        endpoint = %state.openai_compatible.endpoint(),
+        "proxying responses request"
+    );
 
-    info!(endpoint = %state.config.codex_api_endpoint, "proxying responses request");
-
-    match state
-        .upstream
-        .post_responses(&state.config, &auth, &headers, body)
-        .await
-    {
+    match state.openai_compatible.post_responses(&headers, body).await {
         Ok(upstream) => (upstream.status, upstream.headers, upstream.body).into_response(),
         Err(error) => {
             error!(error = %error, "failed to proxy responses request");

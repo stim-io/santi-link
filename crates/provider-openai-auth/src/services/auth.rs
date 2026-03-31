@@ -118,16 +118,16 @@ impl AuthService {
             .await
             .map_err(AuthError::RefreshDecode)?;
 
-        auth_file.openai = OpenAiAuthEntry {
-            auth_type: latest.openai.auth_type,
-            access: payload.access_token,
-            refresh: payload.refresh_token.unwrap_or(latest.openai.refresh),
-            expires: Some(now_millis() + payload.expires_in.unwrap_or(3600) * 1000),
-            account_id: latest.openai.account_id,
-        };
+        auth_file.openai.access = payload.access_token;
+        if let Some(refresh_token) = payload.refresh_token {
+            auth_file.openai.refresh = refresh_token;
+        }
+        auth_file.openai.expires = payload
+            .expires_in
+            .map(|seconds| now_millis() + seconds * 1000);
 
-        let serialized = serde_json::to_string_pretty(&auth_file)?;
-        fs::write(&self.config.auth_file, format!("{serialized}\n")).await?;
+        let raw = serde_json::to_string_pretty(&auth_file)?;
+        fs::write(&self.config.auth_file, raw).await?;
 
         Ok(auth_file)
     }

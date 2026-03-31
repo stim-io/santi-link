@@ -1,3 +1,4 @@
+use axum::{body::Bytes, http::HeaderMap};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use utoipa::ToSchema;
@@ -17,4 +18,11 @@ pub struct ResponsesCreateRequest {
     #[schema(value_type = Object)]
     pub input: Value,
     pub stream: bool,
+}
+
+#[derive(Debug)]
+pub struct UpstreamResponse {
+    pub status: reqwest::StatusCode,
+    pub headers: HeaderMap,
+    pub body: Bytes,
 }

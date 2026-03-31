@@ -1,50 +1,58 @@
 use axum::{
     body::Bytes,
-    http::{HeaderMap, HeaderValue, header},
+    http::{header, HeaderMap, HeaderValue},
 };
+use provider_openai_auth::{auth::OpenAiAuthEntry, AuthConfig, AuthService};
 use reqwest::Client;
 use tracing::error;
 
-use provider_codex_auth::models::auth::OpenAiAuthEntry;
-use crate::services::config::AppConfig;
+use crate::{config::OpenAiCompatibleConfig, models::UpstreamResponse};
 
 #[derive(Debug, thiserror::Error)]
-pub enum UpstreamError {
+pub enum OpenAiCompatibleServiceError {
+    #[error("failed to load openai auth: {0}")]
+    Auth(#[from] provider_openai_auth::services::auth::AuthError),
     #[error("failed to send upstream request: {0}")]
     Request(#[from] reqwest::Error),
 }
 
 #[derive(Debug)]
-pub struct UpstreamResponse {
-    pub status: reqwest::StatusCode,
-    pub headers: HeaderMap,
-    pub body: Bytes,
-}
-
-#[derive(Debug, Default)]
-pub struct UpstreamService {
+pub struct OpenAiCompatibleService {
+    config: OpenAiCompatibleConfig,
+    auth: AuthService,
     client: Client,
 }
 
-impl UpstreamService {
-    pub fn new() -> Self {
+impl OpenAiCompatibleService {
+    pub fn new(config: OpenAiCompatibleConfig) -> Self {
+        let auth = AuthService::new(AuthConfig {
+            auth_file: config.auth_file.clone(),
+            openai_client_id: config.openai_client_id.clone(),
+            openai_issuer: config.openai_issuer.clone(),
+        });
+
         Self {
+            config,
+            auth,
             client: Client::new(),
         }
     }
 
+    pub fn endpoint(&self) -> &str {
+        &self.config.openai_compatible_api_endpoint
+    }
+
     pub async fn post_responses(
         &self,
-        config: &AppConfig,
-        auth: &OpenAiAuthEntry,
         request_headers: &HeaderMap,
         request_body: Bytes,
-    ) -> Result<UpstreamResponse, UpstreamError> {
-        let headers = upstream_headers(auth, request_headers);
+    ) -> Result<UpstreamResponse, OpenAiCompatibleServiceError> {
+        let auth = self.auth.get_openai_auth().await?;
+        let headers = upstream_headers(&auth, request_headers);
 
         let response = self
             .client
-            .post(&config.codex_api_endpoint)
+            .post(&self.config.openai_compatible_api_endpoint)
             .headers(headers)
             .body(request_body)
             .send()
@@ -53,8 +61,8 @@ impl UpstreamService {
         let response = match response {
             Ok(response) => response,
             Err(error) => {
-                error!(error = %error, endpoint = %config.codex_api_endpoint, "upstream request failed");
-                return Err(UpstreamError::Request(error));
+                error!(error = %error, endpoint = %self.config.openai_compatible_api_endpoint, "upstream request failed");
+                return Err(OpenAiCompatibleServiceError::Request(error));
             }
         };
 
@@ -92,7 +100,7 @@ fn upstream_headers(auth: &OpenAiAuthEntry, original: &HeaderMap) -> reqwest::he
     );
     next.insert(
         reqwest::header::USER_AGENT,
-        HeaderValue::from_static("openai-codex-server/0.1.0"),
+        HeaderValue::from_static("providers/0.1.0"),
     );
 
     if let Some(account_id) = &auth.account_id {

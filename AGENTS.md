@@ -2,46 +2,51 @@
 
 ## Provider Workspace
 
-`providers/` is the provider workspace. Its current compose service and Docker image are still named `openai-codex-server`.
+`providers/` is the provider workspace.
+
+`providers/` is the upstream gateway layer inside the repo-root product and deployment boundary, while `santi/` owns core runtime semantics.
 
 Do not publish real `auth.json`; keep local secrets in `auth.json` and use `auth.example.json` as the public template.
 
 ## Start Here
 
+- `../AGENTS.md`: repo-root product and deployment boundary
 - `docs/architecture.md`: current thin-proxy shape and boundaries
 
 ## Directory Rules
 
-- `crates/provider-codex-auth/src/{models,services}`: auth models + AuthService
-- `crates/provider-server/src/{handlers,models,services}`: HTTP handlers, config, upstream
+- `crates/api/src/{handlers,models}`: API host handlers, transport schemas, and route registration
+- `crates/api/src/{config,state}.rs`: API host wiring and provider registration
+- `crates/provider-openai-auth/src/{models,services}`: OpenAI auth models + AuthService
+- `crates/provider-openai-compatible/src/{config,models,service}.rs`: OpenAI-compatible service contract and upstream forwarding
 - `docs/`: architecture and cleanup notes
-- `Dockerfile`: builds provider-server binary
+- `Dockerfile`: builds provider-api binary
 
 ## Common Commands (from `providers/`)
 
 Run local Rust server:
 
 ```bash
-cargo run -p provider-codex-server
+cargo run -p provider-api
 ```
 
 Build check:
 
 ```bash
-cargo check -p provider-codex-server
+cargo check -p provider-api
 ```
 
 Format:
 
 ```bash
-cargo fmt -p provider-codex-server
+cargo fmt -p provider-api
 ```
 
-Run Docker image for the current `openai-codex-server` service:
+Run the current `providers` Docker image:
 
 ```bash
-docker build -t openai-codex-server .
-docker run --rm -p 8080:8080 -v "$PWD/auth.json:/app/auth.json" openai-codex-server
+docker build -t providers .
+docker run --rm -p 8080:8080 -v "$PWD/auth.json:/app/auth.json" providers
 ```
 
 Run Docker Compose (from root):
@@ -71,10 +76,10 @@ Useful env vars:
 
 - `AUTH_FILE`: auth file path
 - `PORT`: bind port
-- `CODEX_API_ENDPOINT`: upstream Codex responses endpoint
+- `OPENAI_COMPATIBLE_API_ENDPOINT`: upstream OpenAI-compatible responses endpoint
 - `OPENAI_CLIENT_ID`: OAuth client id for token refresh
 - `OPENAI_ISSUER`: OAuth issuer base URL
 
 ## FAQ
 
-Legacy `openai-codex-server/` source code moved into `providers/`; the compose service name remains `openai-codex-server`.
+Legacy provider source moved into `providers/`.

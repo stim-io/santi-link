@@ -1,6 +1,13 @@
 [workspace]
 members = [
-  "crates/provider-codex-auth",
-  "crates/provider-server",
+  "crates/provider-openai-auth",
+  "crates/provider-openai-compatible",
+  "crates/api",
 ]
 resolver = "2"
+
+[profile.container-dev]
+inherits = "dev"
+debug = 0
+codegen-units = 256
+incremental = true

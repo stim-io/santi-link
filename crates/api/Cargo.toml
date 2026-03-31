@@ -1,15 +1,15 @@
 [package]
-name = "provider-codex-server"
+name = "provider-api"
 version = "0.1.0"
 edition = "2021"
 
 [[bin]]
-name = "provider-codex-server"
+name = "provider-api"
 path = "src/main.rs"
 
 [dependencies]
 axum = "0.7"
-reqwest = { version = "0.12", default-features = false, features = ["charset", "http2", "json", "macos-system-configuration", "rustls-tls"] }
+provider-openai-compatible = { path = "../provider-openai-compatible" }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 thiserror = "1.0"
@@ -18,4 +18,3 @@ tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
 utoipa = { version = "5", features = ["axum_extras", "chrono", "uuid"] }
 utoipa-swagger-ui = { version = "8", features = ["axum"] }
-provider-codex-auth = { path = "../provider-codex-auth" }

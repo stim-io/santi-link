@@ -1,14 +1,14 @@
 # Architecture (providers)
 
-`providers/` owns the thin auth proxy for OpenAI/Codex Responses. The current runtime service name remains `openai-codex-server`.
+`providers/` owns the thin auth proxy for OpenAI/Codex Responses.
 
 ## Source Layout
 
-- `crates/provider-codex-auth/src/services/auth.rs`: OAuth auth loading/refresh
-- `crates/provider-codex-auth/src/models/auth.rs`: auth schemas
-- `crates/provider-server/src/handlers`: thin HTTP route handlers
-- `crates/provider-server/src/services`: config, upstream forwarding
-- `crates/provider-server/src/models`: minimal schemas for health and `/openai/v1/responses`
+- `crates/api/src/handlers`: API host handlers and route entrypoints
+- `crates/api/src/{config,state}.rs`: API host config and provider registration
+- `crates/provider-openai-auth/src/services/auth.rs`: OAuth auth loading/refresh
+- `crates/provider-openai-auth/src/models/auth.rs`: auth schemas
+- `crates/provider-openai-compatible/src/{config,models,service}.rs`: OpenAI-compatible config, request models, and upstream service
 
 ## Current Status
 
@@ -19,13 +19,19 @@
 - upstream auth injection is implemented through `Authorization` and `chatgpt-account-id`
 - OpenAPI is generated with `utoipa`
 - Swagger UI is mounted at `/swagger-ui`
-- container delivery runs the provider-server binary on port `8080`
+- container delivery runs the provider-api binary on port `8080`
 
 ## Boundary
 
-The server keeps only upstream account-facing concerns:
+The API host keeps only transport and registration concerns:
 
-- OAuth credential loading and refresh (provider-codex-auth)
+- route registration
+- handler declaration
+- OpenAPI / Swagger wiring
+
+Provider-specific service crates keep upstream account-facing concerns:
+
+- OAuth credential loading and refresh (provider-openai-auth)
 - upstream auth/header injection
 - basic forwarding and header hygiene
 

@@ -1,9 +1,6 @@
 use std::net::SocketAddr;
 
-use provider_codex_server::{
-    build_app,
-    services::{app_state::AppState, config::AppConfig},
-};
+use provider_api::{build_app, config::AppConfig, state::AppState};
 use tokio::net::TcpListener;
 use tracing::info;
 
@@ -21,7 +18,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     info!(
         port = config.port,
         swagger = "/swagger-ui",
-        "starting openai-codex-server api"
+        "starting providers api"
     );
 
     axum::serve(listener, build_app(state)).await?;

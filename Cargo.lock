@@ -787,7 +787,23 @@ dependencies = [
 ]
 
 [[package]]
-name = "provider-codex-auth"
+name = "provider-api"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "provider-openai-compatible",
+ "serde",
+ "serde_json",
+ "thiserror 1.0.69",
+ "tokio",
+ "tracing",
+ "tracing-subscriber",
+ "utoipa",
+ "utoipa-swagger-ui",
+]
+
+[[package]]
+name = "provider-openai-auth"
 version = "0.1.0"
 dependencies = [
  "reqwest",
@@ -798,20 +814,17 @@ dependencies = [
 ]
 
 [[package]]
-name = "provider-codex-server"
+name = "provider-openai-compatible"
 version = "0.1.0"
 dependencies = [
  "axum",
- "provider-codex-auth",
+ "provider-openai-auth",
  "reqwest",
  "serde",
  "serde_json",
  "thiserror 1.0.69",
- "tokio",
  "tracing",
- "tracing-subscriber",
  "utoipa",
- "utoipa-swagger-ui",
 ]
 
 [[package]]

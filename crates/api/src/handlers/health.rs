@@ -5,7 +5,7 @@ use crate::models::health::HealthResponse;
 #[utoipa::path(
     get,
     path = "/openai/v1/health",
-    tag = "openai-codex-server",
+    tag = "providers",
     responses((status = 200, description = "Service health status", body = HealthResponse))
 )]
 pub async fn health_handler() -> Json<HealthResponse> {
