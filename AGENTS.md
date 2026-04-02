@@ -1,10 +1,10 @@
-# providers
+# santi-link
 
-## Provider Workspace
+## Link Workspace
 
-`providers/` is the provider workspace.
+`santi-link/` is the link workspace.
 
-`providers/` is the upstream gateway layer inside the repo-root product and deployment boundary, while `santi/` owns core runtime semantics.
+`santi-link/` is the upstream gateway layer inside the repo-root product and deployment boundary, while `santi/` owns core runtime semantics.
 
 Do not publish real `auth.json`; keep local secrets in `auth.json` and use `auth.example.json` as the public template.
 
@@ -22,7 +22,7 @@ Do not publish real `auth.json`; keep local secrets in `auth.json` and use `auth
 - `docs/`: architecture and cleanup notes
 - `Dockerfile`: builds provider-api binary
 
-## Common Commands (from `providers/`)
+## Common Commands (from `santi-link/`)
 
 Run local Rust server:
 
@@ -42,11 +42,11 @@ Format:
 cargo fmt -p provider-api
 ```
 
-Run the current `providers` Docker image:
+Run the current `santi-link` Docker image:
 
 ```bash
-docker build -t providers .
-docker run --rm -p 8080:8080 -v "$PWD/auth.json:/app/auth.json" providers
+docker build -t santi-link .
+docker run --rm -p 8080:8080 -v "$PWD/auth.json:/app/auth.json" santi-link
 ```
 
 Run Docker Compose (from root):
@@ -82,4 +82,4 @@ Useful env vars:
 
 ## FAQ
 
-Legacy provider source moved into `providers/`.
+Legacy provider source moved into `santi-link/`.
