@@ -1,6 +1,6 @@
-# Architecture (providers)
+# Architecture (santi-link)
 
-`providers/` owns the thin auth proxy for OpenAI/Codex Responses.
+`santi-link/` owns the thin auth proxy for OpenAI/Codex Responses.
 
 ## Source Layout
 
