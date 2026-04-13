@@ -8,13 +8,13 @@ name = "provider-api"
 path = "src/main.rs"
 
 [dependencies]
-axum = "0.7"
+axum = "0.8.8"
 provider-openai-compatible = { path = "../provider-openai-compatible" }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
-thiserror = "1.0"
+thiserror = "2.0.18"
 tokio = { version = "1.0", features = ["fs", "macros", "net", "rt-multi-thread", "sync"] }
 tracing = "0.1"
 tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"] }
 utoipa = { version = "5", features = ["axum_extras", "chrono", "uuid"] }
-utoipa-swagger-ui = { version = "8", features = ["axum"] }
+utoipa-swagger-ui = { version = "9.0.2", features = ["axum"] }
